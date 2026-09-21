@@ -1,0 +1,191 @@
+[
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#notice",
+    "href": "ECOM30004_Tutorial_9.html#notice",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Notice",
+    "text": "Notice\n\n\n\n\n\n\n\nConditions of Use\n\n\n\nThis document is intended for personal use and is NOT meant to be shared on the internet (e.g. Studocu, ThinkSwap, StudentVIP, Coursehero, etc.)\nDo not share this document with anyone, even if they are enrolled in ECOM30004/90004.\nOfficial course materials, such as lecture slides, tutorial sheets and prescribed readings should always be your primary point of reference.\n\n\n\n\n\n\n\n\n\nSlides accessible here: pengyunc.github.io/TSAF_Week9\nDownload HTML versions here: Dropbox Link"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#this-tutorial",
+    "href": "ECOM30004_Tutorial_9.html#this-tutorial",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "This tutorial",
+    "text": "This tutorial\nThis tutorial uses lag polynomials to (A) understand and (B) extend our ARMA modelling approach.\n\n\n\n\n\n\n\n\n\n\nAgenda\n\n\n\nWe will make use of BAB3mth.csv from Week 4 and RetailSales.csv from Week 1.\nAll code is provided in the questions in order to focus on the concepts and results.\nPart A: Common factors in ARMA models (BAB3mth.csv)\nPart B: Multiplicative models: seasonal autoregression (RetailSales.csv)\n\n\n\n\n\n\n\n\nInitialisation for Part A\n\nlibrary(urca)\nlibrary(forecast)\n\ndt &lt;- read.csv(\"BAB3mth.csv\")\nY &lt;- ts(dt$BAB3, start=c(2010,1), end=c(2025,6), frequency=12)\nDY &lt;- diff(Y)\nY &lt;- window(Y, end=c(2024,6))\nDY &lt;- window(DY, end=c(2024,6))"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#recap---whats-going-on",
+    "href": "ECOM30004_Tutorial_9.html#recap---whats-going-on",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Recap - What’s going on?",
+    "text": "Recap - What’s going on?\n\nEstimating an AR model is computationally simple.\n\nyou can simply compute this by OLS (by matrix algebra, \\(\\hat{\\beta}=(X^{\\top}X)^{-1}(X^{\\top}y)\\))\n\n\n\nEstimating a model with an MA component is much more computationally intensive.\n\nyou need to rely on numerical methods (e.g. maximum likelihood)\n\n\n\n\n\n\n\n\n\nSuppose we want to estimate the most basic ARMA(1,1). \\[y_{t}=\\phi_{1}y_{t-1}+U_{t}+\\theta_{1}U_{t-1}\\] The maximum likelihood algorithm proceeds as follows:\n\nFirst, guess \\((\\phi_{1},\\theta_{1})\\).\nNext, plug these values into the model, and compute the implied residuals \\(U_{t}\\).\nCompute the likelihood function (how probable the observed data are given those parameters)\nRepeat the process until the likelihood function is maximised.\n\n\n\n\n\n\n\n\n\nHowever, with invertibility, the MA component can be approximated by AR models."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#whats-going-on",
+    "href": "ECOM30004_Tutorial_9.html#whats-going-on",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "What’s going on?",
+    "text": "What’s going on?\nHowever, with invertibility, the MA component can be approximated by AR models.\n\n\n\n\nWhat is invertibility?\nMA is invertible \\(\\to\\) can be re-written as an AR(\\(\\infty\\)) representation (with converging coefficients)\n\n\n\n\n\nWhy can AR models approximate the MA component?\n\n\n\n\n\n\n\nLecture Example: MA(1)\n\n\n\\[\\begin{aligned}\nZ_{t}=U_{t}+\\theta_{1}U_{t-1}\\;\\;\\xrightarrow{\\textsf{can be written as}}\\;\\;& Z_{t}=\\sum^{\\infty}_{j=1}-(-\\theta_{1})^{j}Z_{t-j}+U_{t}\\\\\n\\textsf{or, when there is finite horizon:}\\;\\;& Z_{t}=\\sum^{t-1}_{j=1}-(-\\theta_{1})^{j}Z_{t-j}+U_{t}-(-\\theta_{1})^{t}U_{0}\n\\end{aligned}\\]\n\n\n\n\n\n\n\n\n\nIf \\(|\\theta_{1}|&lt;1\\), then \\((-\\theta_{1})^{t}\\) shrinks to 0 as \\(t\\) becomes larger \\(\\to\\) ignoring certain higher-order AR terms can still yield a reasonable approximation."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible",
+    "href": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "What makes an MA model invertible?",
+    "text": "What makes an MA model invertible?\nExample: In Tutorial 8, the optimal ARMA model for \\(\\Delta Y_{t}\\) is ARMA(1,2) with drift. \\[\\begin{align*}\n\\Delta{}Y_{t}&=\\beta_{0}+Z_{t}\\\\\nZ_{t}&=\\phi_{1}Z_{t-1}+U_{t}+\\theta_{1}U_{t-1}+\\theta_{2}U_{t-2}\n\\end{align*}\\]\n\nConsider only the second equation. Moving all AR terms to the LHS gives: \\[Z_{t}-\\phi_{1}Z_{t-1}=U_{t}+\\theta_{1}U_{t-1}+\\theta_{2}U_{t-2}\\]\n\n\nNext, replace the notation with lag operators \\(L\\), where \\(L^{n}(x_{t})=x_{t-n}\\):\n\\[Z_{t}-\\phi_{1}L(Z_{t})=U_{t}+\\theta_{1}L(U_{t})+\\theta_{2}L^{2}(U_{t})\\]\n\n\n\\[(1-\\phi_{1}L)Z_{t}=\\color{green}{\\underbrace{(1+\\theta_{1}L+\\theta_{2}L^{2})}_{\\substack{\\textsf{the MA lag polynomial}\\\\\\textsf{we are interested in}}}}\\color{black}{U_{t}}\\]\n\n\nCompute the solution of the lag polynomial for the MA component:\n\\[\\begin{align*}\n1+\\theta_{1}z+\\theta_{2}z^{2}&=0\\\\\n\\color{teal}{\\boxed{\\textsf{\\small{}Suppose the solutions are $\\to$}}}\\qquad \\zeta_{1},\\zeta_{2}&=\\frac{-\\theta_{1}\\pm\\sqrt{\\theta_{1}^{2}-4\\theta_{2}}}{2\\theta_{2}}\n\\end{align*}\\]"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible-1",
+    "href": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible-1",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "What makes an MA model invertible?",
+    "text": "What makes an MA model invertible?\nCompute the solution of the lag polynomial for the MA component:\n\\[\\begin{align*}\n1+\\theta_{1}z+\\theta_{2}z^{2}&=0\\\\\n\\color{teal}{\\boxed{\\textsf{\\small{}Suppose the solutions are $\\to$}}}\\qquad \\zeta_{1},\\zeta_{2}&=\\frac{-\\theta_{1}\\pm\\sqrt{\\theta_{1}^{2}-4\\theta_{2}}}{2\\theta_{2}}\n\\end{align*}\\]\n\nThis means that the lag polynomial can be rewritten as:\n\\[(\\zeta_{1}-z)(\\zeta_{2}-z)=0\\]\n\n\n\\[\\color{teal}{\\zeta_{1}}\\color{black}{(1-\\zeta_{1}^{-1}z)\\,\\times\\,} \\color{teal}{\\zeta_{2}}\\color{black}{(1-\\zeta_{2}^{-1}z)=0}\\]\n\n\n\\[(1-\\zeta_{1}^{-1}z)(1-\\zeta_{2}^{-1}z)=0\\]\n\n\n The MA component is invertible if: \\[|\\zeta_{1}^{-1}|&lt;1\\quad \\text{and}\\quad |\\zeta_{2}^{-1}|&lt;1.\\] Graphically, the inverse roots of the MA lag polynomial should lie within the unit circle in the Real-Imaginary plane."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible-2",
+    "href": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible-2",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "What makes an MA model invertible?",
+    "text": "What makes an MA model invertible?\n The MA component is invertible if: \\[|\\zeta_{1}^{-1}|&lt;1\\quad \\text{and}\\quad |\\zeta_{2}^{-1}|&lt;1.\\] Graphically, the inverse roots of the MA lag polynomial should lie within the unit circle in the Real-Imaginary plane. \n\n\n\n\nAside. Consider an ARMA(2,2) model: \\[\\begin{align*}\n(1-\\phi_{1}L-\\phi_{2}L^{2})Z_{t}&=(1+\\theta_{1}L+\\theta_{2}L^{2})U_{t}\\\\\n(1-\\xi_{1}^{-1}L)(1-\\xi_{2}^{-1}L)Z_{t}&=(1-\\zeta_{1}^{-1}L)(1-\\zeta_{2}^{-1}L)U_{t}\n\\end{align*}\\] where \\(\\xi_{1}^{-1},\\xi_{2}^{-1}\\) are inverse roots of the AR lag polynomial: \\(1-\\phi_{1}z-\\phi_{2}z^{2}=0\\).\n\n\n\n\n\nThe AR component is stationary if: \\[|\\xi_{1}^{-1}|&lt;1\\quad\\text{and}\\quad |\\xi_{2}^{-1}|&lt;1\\] Graphically, the inverse roots of the AR lag polynomial should lie within the unit circle in the Real-Imaginary plane."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible-3",
+    "href": "ECOM30004_Tutorial_9.html#what-makes-an-ma-model-invertible-3",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "What makes an MA model invertible?",
+    "text": "What makes an MA model invertible?\n The MA component is invertible if: \\[|\\zeta_{1}^{-1}|&lt;1\\quad \\text{and}\\quad |\\zeta_{2}^{-1}|&lt;1.\\] Graphically, the inverse roots of the MA lag polynomial should lie within the unit circle in the Real-Imaginary plane. \n\nParameter EstimatesMA Inverse RootsChecking MagnitudePlot\n\n\n\neq &lt;- Arima(DY, order=c(1,0,2))       # ARMA(1,2)\nprint(coef(eq))\n\n         ar1          ma1          ma2    intercept \n 0.903845857 -0.304583703 -0.310499904  0.004002802 \n\n\n\n\n\nThus the lag polynomial for the MA component is: \\[\\begin{align*}\n1+\\theta_{1}z+\\theta_{2}z^{2}&=0\\\\\n1-0.3046z-0.3105z^{2}&=0\n\\end{align*}\\]\n\n\nThe polyroot() function in R solves for the complex roots of a polynomial.\n(the coefficients has to be ordered from the constant term to the highest degree term) \\[1+\\theta_{1}z+\\theta_{2}z^{2}=0\\]\n\nMA2roots &lt;- polyroot(c(1,eq$coef[c(\"ma1\", \"ma2\")]))\nMA2invroots &lt;- 1/MA2roots\nprint(round(MA2invroots,4))\n\n[1]  0.7300+0i -0.4254+0i\n\n\n\n\n\nSo we have \\(\\zeta_{1}^{-1}=0.7300\\) and \\(\\zeta_{2}^{-1}=-0.4254\\).\n\n\nThe magnitudes for these inverse roots (takes form \\(\\zeta^{-1}=a+ib\\)) are:\n\\[|\\zeta^{-1}|=\\sqrt{a^{2}+b^{2}} \\quad\\implies\\quad\\begin{aligned}|\\zeta_{1}^{-1}|&=\\sqrt{0.73^{2}+0^{2}}=0.73\\;\\color{green}{&lt;1}\\\\\n|\\zeta_{2}^{-1}|&=\\sqrt{(-0.4254)^{2}+0^{2}}=0.4254\\;\\color{green}{&lt;1}\n\\end{aligned}\\]\nThe relevant R function is Mod():\n\nprint(Mod(MA2invroots))\n\n[1] 0.7299533 0.4253696\n\n\n\n\n\nSince both inverse roots are less than 1 in magnitude \\(\\to\\) lies within the unit circle.\n\n\n\nplot(eq)\nmtext(paste0(\"ARMA(\",1,\",\",2,\")  \"), \nside=3, line=2, cex=1.3, font=2)\n\n\n\n\n\n\n\n\n\n \\[\\begin{aligned}\n&\\textsf{Right panel:}\\\\\n&\\zeta_{1}^{-1}=0.7300\\\\\n&\\zeta_{2}^{-1}=-0.4254\n\\end{aligned}\\]"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models",
+    "href": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part A - Exercise 1: Common factors in ARMA models",
+    "text": "Part A - Exercise 1: Common factors in ARMA models\n\nProgressively increment the orders of both AR and MA models so that we estimate ARMA(1,2), ARMA(2,3), ARMA(3,4) and ARMA(4,5) models.\nPlot the inverted roots for these four models. Discuss the implication of plots.\n\n\n\n\n\nfor (j in 0:3){\n  eq &lt;- Arima(DY, order=c(1+j,0,2+j))\n  plot(eq)\n  mtext(paste0(\"ARMA(\",1+j,\",\",2+j,\")\"), \n    side=3, line=2, cex=1.3, font=2) }\n\n\nARMA(1,2)ARMA(2,3)ARMA(3,4)ARMA(4,5)"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-1",
+    "href": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-1",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part A - Exercise 1: Common factors in ARMA models",
+    "text": "Part A - Exercise 1: Common factors in ARMA models\n\nARMA(1,2)ARMA(2,3)ARMA(3,4)ARMA(4,5)\n\n\n\neq &lt;- Arima(DY, order=c(1,0,2)) \nMA2invroots &lt;- 1/polyroot(c(1,eq$coef[c(\"ma1\", \"ma2\")]))\nprint(round(MA2invroots,4))         # MA Inverse roots\n\n[1]  0.7300+0i -0.4254+0i\n\nprint(round(Mod(MA2invroots),4))    # Magnitudes of MA inverse roots\n\n[1] 0.7300 0.4254\n\n\n\n\n\n\n\n\n\n\n\n\n\n\neq &lt;- Arima(DY, order=c(2,0,3)) \nMA3invroots &lt;- 1/polyroot(c(1,eq$coef[c(\"ma1\", \"ma2\", \"ma3\")]))\nprint(round(MA3invroots,4))         # MA Inverse roots\n\n[1]  0.7477+0i -0.9564+0i -0.4993+0i\n\nprint(round(Mod(MA3invroots),4))    # Magnitudes of MA inverse roots\n\n[1] 0.7477 0.9564 0.4993\n\n\n\n\n\n\n\n\n\n\n\n\nBoth extra inverted AR and MA roots are very close to 1\n\\(\\Rightarrow\\) this model for the same time series apparently has suddenly become both non-stationary and non-invertible.\n\n\n\\(\\swarrow\\)\n\n\n\\(\\swarrow\\)\n\n\n\n\neq &lt;- Arima(DY, order=c(3,0,4)) \nMA4invroots &lt;- 1/polyroot(c(1,eq$coef[c(\"ma1\", \"ma2\", \"ma3\", \"ma4\")]))\nprint(round(MA4invroots,4))         # MA inverse roots\n\n[1]  0.5508-0.8347i  0.5508+0.8347i  0.7586+0.0000i -0.4346+0.0000i\n\nprint(round(Mod(MA4invroots),4))    # Magnitudes of MA inverse roots\n\n[1] 1.0000 1.0000 0.7586 0.4346\n\n\n\n\n\n\n\n\n\n\n\n\nWith the addition of 2 to both AR and MA orders, we now have two additional (very close to) non-stationary AR inverse roots and two non-invertible MA inverse roots, all four of which happen to be complex.\n\n\n\\(\\nearrow\\)\n\n\n\\(\\searrow\\)\n\n\n\\(\\nearrow\\)\n\n\n\\(\\searrow\\)\n\n\n\n\neq &lt;- Arima(DY, order=c(4,0,5)) \nMA5invroots &lt;- 1/polyroot(c(1,eq$coef[c(\"ma1\", \"ma2\", \"ma3\", \"ma4\", \"ma5\")]))\nprint(round(MA5invroots,4))         # MA inverse roots\n\n[1]  0.5496-0.8354i -0.9563+0.0000i  0.5496+0.8354i  0.7717+0.0000i\n[5] -0.5101+0.0000i\n\nprint(round(Mod(MA5invroots),4))    # Magnitudes of MA inverse roots\n\n[1] 1.0000 0.9563 1.0000 0.7717 0.5101\n\n\n\n\n\n\n\n\n\n\n\n\nNow there are three additional (very close to) non-stationary AR inverse roots and non-invertible MA inverse roots.\n\n\n\\(\\nearrow\\)\n\n\n\\(\\searrow\\)\n\n\n\\(\\nearrow\\)\n\n\n\\(\\searrow\\)\n\n\n\\(\\swarrow\\)\n\n\n\\(\\swarrow\\)"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-2",
+    "href": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-2",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part A - Exercise 1: Common factors in ARMA models",
+    "text": "Part A - Exercise 1: Common factors in ARMA models\n\nWhat is going on here?\n\n\n\n\n\n\n\n\nIn Tutorial 8, the optimal ARMA model for \\(\\Delta Y_{t}\\), chosen by the AICc, is ARMA(1,2). Let’s assume that it is the correct model.\n\n\n\n\n\n\n\n\nThe AIC-selected ARMA(1,2) model can be written symbolically as:\n\\[(1-\\xi_{1}^{-1}L)Z_{t}=(1-\\zeta_{1}^{-1}L)(1-\\zeta_{2}^{-1}L)U_{t}\\]\n\n\nThe AR and MA inverse roots are:\n\n\n      xi_1  zeta_1     zeta_2\n 0.9038+0i 0.73+0i -0.4254+0i\n\n\n\\[(1-0.9038L)Z_{t}=(1-0.73L)(1+0.4254L)U_{t}\\]\n\n\nIf ARMA(1,2) is indeed the correct model, then if we increment the specification to ARMA(2,3), \\[(1-\\xi_{1}^{-1}L)(1-\\color{purple}{\\xi_{2}^{-1}}\\color{black}{L)Z_{t}=(1-\\zeta_{1}^{-1}L)(1-\\zeta_{2}^{-1}L)(1\\,-}\\color{teal}{\\,\\zeta_{3}^{-1}}\\color{black}{L)U_{t}}\\] the “correct” values of the excess terms \\(\\xi_{2}^{-1}\\) and \\(\\zeta_{3}^{-1}\\) should be 0."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-3",
+    "href": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-3",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part A - Exercise 1: Common factors in ARMA models",
+    "text": "Part A - Exercise 1: Common factors in ARMA models\n\nWhat is going on here?\n\n\\[(1-0.9038L)Z_{t}=(1-0.73L)(1+0.4254L)U_{t}\\]\n\n\n\nIf ARMA(1,2) is indeed the correct model, then if we increment the specification to ARMA(2,3), \\[(1-\\xi_{1}^{-1}L)(1-\\color{purple}{\\xi_{2}^{-1}}\\color{black}{L)Z_{t}=(1-\\zeta_{1}^{-1}L)(1-\\zeta_{2}^{-1}L)(1\\,-}\\color{teal}{\\,\\zeta_{3}^{-1}}\\color{black}{L)U_{t}}\\] the “correct” values of the excess terms \\(\\xi_{2}^{-1}\\) and \\(\\zeta_{3}^{-1}\\) should be 0.\n\n\n\n\nUnfortunately things get more complicated in this specification.\n\n\nThe AR and MA inverse roots for ARMA(2,3) are:\n\n\n      xi_1       xi_2    zeta_1     zeta_2     zeta_3\n 0.9092+0i -0.9885+0i 0.7477+0i -0.9564+0i -0.4993+0i\n\n\n\n\\[(1-0.9092L)(1-\\color{purple}{(-0.9885)}\\color{black}{L)Z_{t}=(1-0.7477L)(1+0.4993L)(1-}\\color{teal}{(-0.9564)}\\color{black}{L)U_{t}}\\]\n\nwhere \\(\\xi_{2}^{-1}=-0.9885\\) and \\(\\zeta_{3}^{-1}=-0.9564\\) are very much not 0."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-4",
+    "href": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-4",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part A - Exercise 1: Common factors in ARMA models",
+    "text": "Part A - Exercise 1: Common factors in ARMA models\n\nWhat is going on here?\n\n\n\\[(1-0.9038L)Z_{t}=(1-0.73L)(1+0.4254L)U_{t}\\]\n\\[(1-0.9092L)\\color{red}{(1+0.9885L)}\\color{black}{Z_{t}=(1-0.7477L)(1+0.4993L)}\\color{red}{(1+0.9564L)}\\color{black}{U_{t}}\\]\n\nBy introducing the extra terms on both sides we have introduced what is referred to as a “common factor”, and the “common factor” can be “cancelled” from both sides.\n\n\n\n\nWhat does this mean, and what is the problem?\n\n\nThere is only one true data generating process in reality, indicating there is a unique set of AR and MA roots \\((\\xi_{1}^{-1},\\xi_{2}^{-1},\\zeta_{1}^{-1},\\zeta_{2}^{-1},\\zeta^{-1}_{3})\\). Therefore, there should only be a unique set of AR \\((\\phi_{1},\\phi_{2})\\) and MA \\((\\theta_{1},\\theta_{2},\\theta_{3})\\) parameters.\nSince the common factor can be cancelled out, the inverse roots \\(\\xi_{2}^{-1}\\) and \\(\\zeta_{3}^{-1}\\) can now take on a range of values as long as \\(\\xi_{2}^{-1}=\\zeta_{3}^{-1}\\). \\(\\implies\\) the model parameters \\((\\phi_{1},\\phi_{2},\\theta_{1},\\theta_{2},\\theta_{3})\\) are NOT unique \\(\\implies\\) the model is NOT identified!\nThis is why the numerical algorithm pushes the excess parameters (\\(\\xi_{2}^{-1}\\), \\(\\zeta_{3}^{-1}\\)) towards the unit circle, even though we might expect them to shrink towards zero."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-5",
+    "href": "ECOM30004_Tutorial_9.html#part-a---exercise-1-common-factors-in-arma-models-5",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part A - Exercise 1: Common factors in ARMA models",
+    "text": "Part A - Exercise 1: Common factors in ARMA models\nSome practical observations:\n\nIf an ARMA(\\(p,q\\)) model has inverse roots that nearly cancel, especially near the unit circle, you should reconsider whether smaller orders would suffice.\nAs AIC/AICc is balancing between model complexity and fit quality, it would usually be the case that it will work to avoid this issue.\n\nHowever, it is worth acknowledging that AICc is not perfect and might select models that is too large.\n\nWhen doing model selection searches, it is generally advised to avoid increasing the order of both AR and MA components simultaneously.\n\nIt is better to increase AR or MA components separately, in which case this potential identification problem should be avoided.\nBrute-force AIC search over (\\(p,q\\)) works for small grids but can cause instability at larger orders \\(\\to\\) there exists smarter methods (e.g. auto.arima) avoid this.\n\nMore pragmatically, at least in economics and finance it has become more common to rely simply on AR models rather than ARMA.\n\nAvoids the common factor problem, quicker (can use OLS), more stable than ARMA, and simplifies extensions to multivariate models (e.g. VAR)."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-b-multiplicative-models-seasonal-autoregression",
+    "href": "ECOM30004_Tutorial_9.html#part-b-multiplicative-models-seasonal-autoregression",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part B: Multiplicative Models: Seasonal Autoregression",
+    "text": "Part B: Multiplicative Models: Seasonal Autoregression\n\nAn alternative model for seasonality is the seasonal AR model. (There is also a seasonal MA model, which follows the same principles.)\n\n\n\n\n\nA simple example is the first order seasonal AR (SAR) model, specified here for quarterly data:\n\\[\nZ_{t}=\\Phi_{1}Z_{t-4}+U_{t}\\quad \\iff\\quad (1-\\Phi_{1}L^{4})Z_{t}=U_{t}\n\\]\nThat is, \\(Y_{t}\\) is modeled directly in terms of the observation from one year ago. This is four time periods for quarterly data, hence the \\(Z_{t-4}\\) term.\n\n\n\n\n\nIn general we can have higher order seasonal AR models: \\[\n(1-\\Phi_{1}L^{4}-\\cdots-\\Phi_{P}L^{4P})Z_{t}=U_{t}\n\\]\nwhich expresses the forecasts for \\(Y_{t}\\) in terms of observations from \\(1,\\dots,P\\) years ago."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#part-b-multiplicative-models-seasonal-autoregression-1",
+    "href": "ECOM30004_Tutorial_9.html#part-b-multiplicative-models-seasonal-autoregression-1",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Part B: Multiplicative Models: Seasonal Autoregression",
+    "text": "Part B: Multiplicative Models: Seasonal Autoregression\nMost commonly the SAR model is combined with an AR model, so that seasonal and non-seasonal components are permitted.\n\n\n\n\nThis is done in a multiplicative manner using lag polynomials.\nFor example an AR(1),SAR(1) model is \\[(1-\\phi_{1}L)(1-\\Phi_{1}L^{4})Z_{t}=U_{t}\\] This is essentially a restricted AR(5) model. \\(\\to\\) Exercise 2(a)\n\n\n\n\n\nIn general an AR(\\(p\\)),SAR(\\(P\\)) model is \\[(1-\\phi_{1}L-\\cdots-\\phi_{p}L^{p})(1-\\Phi_{1}L^{4}-\\cdots-\\Phi_{P}L^{4P})Z_{t}=U_{t}\\] The selection of \\(p\\) and \\(P\\) can be handled in the usual way using AIC and residual autcorrelation checks with Ljung-Box testing."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2a",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2a",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(a)",
+    "text": "Exercise 2(a)\n\nExpand the lag polynomials in the AR(1),SAR(1) model to show that it is equivalent to an AR(5) model with particular parameter restrictions. \\[(1-\\phi_{1}L)(1-\\Phi_{1}L^{4})Z_{t}=U_{t}\\]\n\n\n\n\n\nWe can algebraically manipulate lag polynomials like any other polynomial:\n\\[\\begin{align}\n(1-\\phi_{1}L)(1-\\Phi_{1}L^{4})&=1-\\phi_{1}-\\Phi_{1}L^{4}+\\phi_{1}\\Phi_{1}L\\cdot L^{4}\\\\\n&=1-\\phi_{1}-\\Phi_{1}L^{4}+\\phi_{1}\\Phi_{1}L^{5}\n\\end{align}\\]\n\n\nThus the model can be re-written as:\n\\[(1-\\phi_{1}L-\\Phi_{1}L^{4}+\\phi_{1}\\Phi_{1}L^{5})Z_{t}=U_{t}\\]\n\n\n\\[\\implies\\qquad Z_{t}=\\phi_{1}Z_{t-1}+\\Phi_{1}Z_{t-4}-\\phi_{1}\\Phi_{1}Z_{t-5}+U_{t}\\]\n\n\nComparing this model with the standard AR(5) setup: \\[Z_{t}=\\phi_{1}^* Z_{t-1}+\\phi_{2}^* Z_{t-2}+\\phi_{3}^* Z_{t-3}+\\phi_{4}^* Z_{t-4}+\\phi_{5}^* Z_{t-5}+U_{t}\\]\n\n\nthe restrictions are \\(\\phi_{1}^*=\\phi_{1}\\), \\(\\phi_{2}=\\phi_{3}=0\\), \\(\\phi_{4}^{*}=\\Phi_{1}\\) and \\(\\phi_{5}^*=-\\phi_{1}\\Phi_{1}\\)."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2b",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2b",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(b)",
+    "text": "Exercise 2(b)\n\nUsing RetailSales.csv from Week 1/2, carry out a model selection search over AR(\\(p\\)), SAR(\\(P\\)) models with maximum of 4 for both \\(p\\) and \\(P\\).\n\\[(1-\\phi_{1}L-\\cdots-\\phi_{p}L^{p})(1-\\Phi_{1}L^{4}-\\cdots-\\Phi_{P}L^{4P})Z_{t}=U_{t}\\] What is the longest lag of \\(Z_{t}\\) implied by this AR,SAR model?\n\n\n\n\nInitialisation: Copy the following to set up in the usual way\n\nlibrary(forecast)\n\n# Set up log retail sales, 2000q1 to 2019q4\ndt &lt;- read.csv(\"RetailSales.csv\")\nRetail_m &lt;- ts(dt$Total, frequency=12, start=c(1982,4), end=c(2024,9))\nRetail_q &lt;- aggregate(Retail_m, nfrequency=4)\nlog_Retail_q &lt;- log(Retail_q)\nY &lt;- window(log_Retail_q, start=c(2000,1), end=c(2019,4))\n\n# Linear trend\nTime &lt;- time(Y)\n\n\n\n\n(continued next slide…)"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2b-1",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2b-1",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(b)",
+    "text": "Exercise 2(b)\nSet up deterministics:\n\n# GFC trend break\ngfc &lt;- 2008.5\nTime_postgfc &lt;- 1*(Time&gt;gfc)*(Time-gfc)\n\n# Quarterly dummies\nQD &lt;- seasonaldummy(Y)\n\n# Deterministics without seasonal dummies\nX &lt;- cbind(Time, Time_postgfc)\n\n# Deterministics with seasonal dummies\nXQD &lt;- cbind(Time, Time_postgfc, QD)\n\n\n\n\nDefine samples for estimation and forecast evaluation:\n\n# Estimation sample\nt_est &lt;- which(Time&lt;2019)\nY &lt;- window(log_Retail_q, start=c(2000,1), end=c(2018,4))\n\n# Forecast evaluation sample\nt_for &lt;- which(Time&gt;=2019)\nYf &lt;- window(log_Retail_q, start=c(2019,1), end=c(2019,4))"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2b-2",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2b-2",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(b)",
+    "text": "Exercise 2(b)\n\nUsing RetailSales.csv from Week 1/2, carry out a model selection search over AR(\\(p\\)), SAR(\\(P\\)) models with maximum of 4 for both \\(p\\) and \\(P\\).\n\\[(1-\\phi_{1}L-\\cdots-\\phi_{p}L^{p})(1-\\Phi_{1}L^{4}-\\cdots-\\Phi_{P}L^{4P})Z_{t}=U_{t}\\] What is the longest lag of \\(Z_{t}\\) implied by this AR,SAR model?\n\n\n\n\n\npmax &lt;- 4\nPmax &lt;- 4\nAICc &lt;- matrix(nrow=1+pmax, ncol=1+Pmax)\nrownames(AICc) &lt;- paste0(\"AR\",0:pmax)\ncolnames(AICc) &lt;- paste0(\"SAR\",0:Pmax)\nLBp &lt;- AICc\n\nfor (p in 0:pmax){\n  for (P in 0:Pmax){\n\n    # Specification of AR(p), SAR(P) model:\n    eq_sar &lt;- Arima(Y, order=c(p,0,0), xreg=X[t_est,],\n            seasonal=list(order=c(P,0,0), period=4))\n\n    AICc[1+p,1+P] &lt;- eq_sar$aicc\n    LBp[1+p,1+P] &lt;- Box.test(eq_sar$residuals, type=\"Ljung-Box\", \n                                fitdf=p+P, lag=12)$p.value\n  }\n}"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2b-3",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2b-3",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(b)",
+    "text": "Exercise 2(b)\n\nUsing RetailSales.csv from Week 1/2, carry out a model selection search over AR(\\(p\\)), SAR(\\(P\\)) models with maximum of 4 for both \\(p\\) and \\(P\\).\n\\[(1-\\phi_{1}L-\\cdots-\\phi_{p}L^{p})(1-\\Phi_{1}L^{4}-\\cdots-\\Phi_{P}L^{4P})Z_{t}=U_{t}\\] What is the longest lag of \\(Z_{t}\\) implied by this AR,SAR model?\n\n\n\n\nResults:\n\nAICc valuesModel selection searchResidual autocorrelation\n\n\n\nprint(round(AICc, 4))\n\n         SAR0      SAR1      SAR2      SAR3      SAR4\nAR0 -183.9288 -383.6143 -393.7658 -382.5243 -380.7893\nAR1 -186.8830 -427.5469 -436.8123 -440.0512 -437.5669\nAR2 -197.8278 -427.5613 -434.8512 -437.7967 -435.1855\nAR3 -243.8547 -430.7242 -434.3403 -436.3189 -433.6872\nAR4 -379.5825 -379.1405 -432.4139 -376.3585 -431.2748\n\n\n\n\n\nprint(AICc==min(AICc))\n\n     SAR0  SAR1  SAR2  SAR3  SAR4\nAR0 FALSE FALSE FALSE FALSE FALSE\nAR1 FALSE FALSE FALSE  TRUE FALSE\nAR2 FALSE FALSE FALSE FALSE FALSE\nAR3 FALSE FALSE FALSE FALSE FALSE\nAR4 FALSE FALSE FALSE FALSE FALSE\n\n\n\n\n\nThe selected model has \\(p=1\\) and \\(P=3\\). \\(\\implies\\) longest lag of \\(Z_{t}\\) is 13.\n\\[\\color{teal}{\\boxed{\\textsf{\\small\\;found by expanding this }\\to\\;}}\\quad\\color{black}{ (1-\\phi_{1}L)(1-\\Phi_{1}L^{4}-\\Phi_{2}L^{8}-\\Phi_{3}L^{12})Z_{t}=U_{t}}\\]\n\n\n\n\n\nprint(round(LBp,3))\n\n    SAR0  SAR1  SAR2  SAR3  SAR4\nAR0    0 0.000 0.000 0.000 0.000\nAR1    0 0.079 0.512 0.739 0.693\nAR2    0 0.086 0.433 0.711 0.634\nAR3    0 0.346 0.472 0.485 0.425\nAR4    0 0.000 0.402 0.000 0.426\n\n\n\n\nprint(1*(LBp&lt;0.05))\n\n    SAR0 SAR1 SAR2 SAR3 SAR4\nAR0    1    1    1    1    1\nAR1    1    0    0    0    0\nAR2    1    0    0    0    0\nAR3    1    0    0    0    0\nAR4    1    1    0    1    0\n\n\n\n\n\n\nSince \\(p=0.739&gt;0.05\\), we can maintain \\(H_0\\) of no residual autocorrelation\n\\(\\implies\\) the AR(1),SAR(3) model is not misspecified."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2b-4",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2b-4",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(b)",
+    "text": "Exercise 2(b)\n\nUse the a model with the selected \\(p\\) and \\(q\\) to forecast the four quarters of 2019 (i.e. 1,2,3,4-steps ahead), and compute their RMSE.\n\n\n\n\n\np &lt;- 1\nP &lt;- 3\neq_sar &lt;- Arima(Y, order=c(p,0,0), xreg=X[t_est,],\n        seasonal=list(order=c(P,0,0), period=4))\n\n# Forecast through 2019\nYf_sar &lt;- forecast(eq_sar, xreg=X[t_for,])$mean\n\n# Compute RMSE\nRMSE_sar &lt;- sqrt(mean((Yf-Yf_sar)^2))\n\n\n\n\nThe forecasts from AR(1),SAR(3) are:\n\nprint(Yf_sar)\n\n         Qtr1     Qtr2     Qtr3     Qtr4\n2019 11.26355 11.28073 11.30355 11.44880\n\n\n\n\n\nThe RMSE for AR(1),SAR(3) forecasts is:\n\nprint(RMSE_sar)\n\n[1] 0.00788378"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2c",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2c",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(c)",
+    "text": "Exercise 2(c)\n\nPreviously we have identifed an AR(3) model is suitable when also using a linear trend with GFC break and quarterly dummies. Estimate this model, obtain the forecasts for the four quarters of 2019, and compute their RMSE.\n\n\n\n\n\n# Estimation of AR(3) with XQD as deterministic matrix (with seasonal dummies)\neq_qd &lt;- Arima(Y, order=c(3,0,0), xreg=XQD[t_est,])\n\n# Forecast through 2019\nYf_qd &lt;- forecast(eq_qd, xreg=XQD[t_for,])$mean\n\n# Compute RMSE\nRMSE_qd &lt;- sqrt(mean((Yf-Yf_qd)^2))\n\n\n\n\nThe forecasts from AR(3) are:\n\nprint(Yf_qd)\n\n         Qtr1     Qtr2     Qtr3     Qtr4\n2019 11.25779 11.27883 11.30279 11.45205\n\n\n\n\n\nThe RMSE for AR(3) forecasts is:\n\nprint(RMSE_qd)\n\n[1] 0.00804294\n\n\n\n\\(\\longleftarrow\\) The SAR model has slightly lower RMSE (at 0.0078) than the AR(3) with quarterly dummies."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2d",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2d",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(d)",
+    "text": "Exercise 2(d)\n\nRepeat the search in (b) but with quarterly dummies also included. This is combining both quarterly dummies and seasonal AR modelling to capture the seasonality in the data.\n\n\n\n\n\nFirst, observe the AICc values:\n\n# AICc for AR(3) with seasonal dummies\nprint(eq_qd$aicc)\n\n[1] -472.9557\n\n\n\n\n\n\n# AICc for Seasonal AR: AR(1),SAR(3)\nprint(eq_sar$aicc)\n\n[1] -440.0512\n\n\n\n\n\nThe model with quarterly dummies is clearly preferred by the AICc to the seasonal autoregression."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2d-1",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2d-1",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(d)",
+    "text": "Exercise 2(d)\n\nRepeat the search in (b) but with quarterly dummies also included. This is combining both quarterly dummies and seasonal AR modelling to capture the seasonality in the data.\n\n\n\n\nWe would like to check if including the quarterly dummies in the seasonal AR model may improve the model further: (conduct the grid search again, but use XQD instead)\n\n\n\n\npmax &lt;- 4\nPmax &lt;- 4\nAICc &lt;- matrix(nrow=1+pmax, ncol=1+Pmax)\nrownames(AICc) &lt;- paste0(\"AR\",0:pmax)\ncolnames(AICc) &lt;- paste0(\"SAR\",0:Pmax)\nLBp &lt;- AICc\n\nfor (p in 0:pmax){\n  for (P in 0:Pmax){\n    eq_sar &lt;- Arima(Y, order=c(p,0,0), xreg=XQD[t_est,],  # &lt;-- changed\n          seasonal=list(order=c(P,0,0), period=4))\n    AICc[1+p,1+P] &lt;- eq_sar$aicc\n  }\n}"
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#exercise-2d-2",
+    "href": "ECOM30004_Tutorial_9.html#exercise-2d-2",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "Exercise 2(d)",
+    "text": "Exercise 2(d)\n\nRepeat the search in (b) but with quarterly dummies also included. This is combining both quarterly dummies and seasonal AR modelling to capture the seasonality in the data.\n\n\n\n\nWe would like to check if including the quarterly dummies in the seasonal AR model may improve the model further: (conduct the grid search again, but use XQD instead)\n\n\n\nThus when quarterly dummies are used…\n\nprint(AICc==min(AICc))\n\n     SAR0  SAR1  SAR2  SAR3  SAR4\nAR0 FALSE FALSE FALSE FALSE FALSE\nAR1 FALSE FALSE FALSE FALSE FALSE\nAR2 FALSE FALSE FALSE FALSE FALSE\nAR3  TRUE FALSE FALSE FALSE FALSE\nAR4 FALSE FALSE FALSE FALSE FALSE\n\n\n\n\n\n\n… AR(3) remains the preferred specification \\(\\to\\) there is no further improvement in model fit by also using seasonal autoregressive components."
+  },
+  {
+    "objectID": "ECOM30004_Tutorial_9.html#section",
+    "href": "ECOM30004_Tutorial_9.html#section",
+    "title": "\n\nECOM30004/90004\n\n\nTime Series Analysis and Forecasting\n\n\n\n\n\nTutorial 9\n\n\n\n\n\nTutor: Pengyun (Kevin) Chen\n\n\nUniversity of Melbourne\n\n\nSemester 2, 2026\n\n",
+    "section": "",
+    "text": "Thank you for coming!"
+  }
+]
